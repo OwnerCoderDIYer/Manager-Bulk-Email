@@ -5,8 +5,7 @@ feature. Back up your data and review every prepared email before
 sending.
 1. Open the extension
 Save `manager-aged-receivables-v4.1-community.html` to your computer and
-open it in a browser. Keep Manager open and signed in in the same
-browser.
+install to Manager extensions. 
 2. Set your Manager server URL
 Expand Connection settings and enter your Manager server URL.
 Examples:
