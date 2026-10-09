@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manager · Aged Receivables v4.1 Community</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1017;--panel:#111923;--panel2:#172230;--line:#273546;--muted:#91a0b3;--text:#e8eef5;--blue:#69a9ff;--red:#ff737d;--amber:#f2bf69;--green:#6bd4a2}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1000px 500px at 10% -10%,#182b40 0%,transparent 65%),var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:#1b2939;color:var(--text);border-radius:9px;padding:9px 12px}button:hover{border-color:#50759d;background:#22364c}button.primary{background:#2563a8;border-color:#367bc2}button:disabled{opacity:.5;cursor:wait}.wrap{max-width:1500px;margin:auto;padding:26px}.top{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:22px}.eyebrow{color:var(--blue);font-weight:700;text-transform:uppercase;letter-spacing:.13em;font-size:11px}.title{font-size:27px;font-weight:750;letter-spacing:-.035em;margin:3px 0}.sub{color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}.settings,.panel,.stat{background:linear-gradient(145deg,rgba(20,31,44,.97),rgba(15,23,33,.97));border:1px solid var(--line);border-radius:15px}.settings{padding:15px;margin-bottom:16px}.settings summary{cursor:pointer;font-weight:650}.settings-grid{display:grid;grid-template-columns:2fr 2fr 1fr;gap:10px;margin-top:14px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input{width:100%;background:#0a1119;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:10px}.note{font-size:12px;color:var(--muted);margin-top:10px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}.stat{padding:16px}.stat .label{font-size:12px;color:var(--muted)}.stat .num{font-size:26px;font-weight:750;letter-spacing:-.04em;margin-top:4px}.stat .small{font-size:12px;color:var(--muted);margin-top:3px}.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px}.toolbar input,.toolbar select{background:#0a1119;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:9px}.toolbar input{flex:1;min-width:180px}.toolbar .count{color:var(--muted);margin-left:auto}.panel{overflow:hidden}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:920px}th{text-align:left;background:#121d29;color:#9fadc0;font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:12px 13px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:13px;border-bottom:1px solid #202d3b;vertical-align:middle}tbody tr:hover{background:rgba(76,119,164,.08)}tbody tr:last-child td{border-bottom:0}.customer{font-weight:650}.reference{font-size:12px;color:var(--muted);margin-top:2px}.money{font-variant-numeric:tabular-nums;white-space:nowrap}.status{display:inline-flex;border-radius:100px;padding:4px 8px;font-size:11px;font-weight:700;white-space:nowrap}.status.overdue{background:#48252d;color:#ff9aa2}.status.today{background:#49371f;color:#ffd18b}.status.due{background:#1c354c;color:#9bcaff}.status.paid{background:#1b3b31;color:#8be2b8}.row-actions{white-space:nowrap}.row-actions button{padding:7px 9px;font-size:12px}.empty{padding:40px;text-align:center;color:var(--muted)}.footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 15px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}.pages{display:flex;gap:7px}.message{display:none;border-radius:10px;padding:11px 13px;margin-bottom:12px}.message.show{display:block}.message.error{background:#3b2027;border:1px solid #773742;color:#ffb6bc}.message.ok{background:#17352c;border:1px solid #2b654e;color:#a4edcb}.message.info{background:#182c41;border:1px solid #2e5277;color:#b6d8ff}.warning{margin-top:12px;color:#f4d39a;font-size:12px}.check{accent-color:#69a9ff}.loading{display:inline-block;width:13px;height:13px;border:2px solid #62778e;border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:6px}@keyframes spin{to{transform:rotate(360deg)}}
+.bulk-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.76);padding:20px;overflow:auto}
+.bulk-overlay.show{display:flex;align-items:flex-start;justify-content:center}
+.bulk-dialog{width:min(1100px,100%);margin:auto;background:#101923;border:1px solid #35475b;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden}
+.bulk-head,.bulk-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;background:#152130;border-bottom:1px solid var(--line)}
+.bulk-head h2{margin:0;font-size:20px}.bulk-head p{margin:4px 0 0;color:var(--muted);font-size:13px}.bulk-foot{border-top:1px solid var(--line);border-bottom:0;justify-content:flex-end}
+.bulk-progress{padding:10px 18px;color:var(--muted);font-size:13px;border-bottom:1px solid var(--line)}
+.bulk-list{max-height:60vh;overflow:auto}
+.bulk-row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;padding:14px 18px;border-bottom:1px solid #243243;align-items:start}
+.bulk-row:last-child{border-bottom:0}.bulk-row input{margin-top:4px}.bulk-main{min-width:0}.bulk-title{font-weight:700}.bulk-meta{font-size:12px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}.bulk-subject{font-size:13px;margin-top:6px;overflow-wrap:anywhere}.bulk-preview{margin-top:7px}.bulk-preview summary{font-size:12px;color:#9fc8f5;cursor:pointer}.bulk-preview pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.5 system-ui;color:#cbd6e3;background:#0a1119;border-radius:8px;padding:10px;max-height:180px;overflow:auto}.bulk-state{font-size:12px;font-weight:700;white-space:nowrap}.bulk-state.ready{color:var(--green)}.bulk-state.failed{color:var(--red)}.bulk-state.sending{color:var(--amber)}.bulk-state.sent{color:var(--green)}.bulk-error{color:#ff9aa2;font-size:12px;margin-top:5px;overflow-wrap:anywhere}
+@media(max-width:650px){.bulk-overlay{padding:7px}.bulk-row{grid-template-columns:22px minmax(0,1fr);padding:12px}.bulk-state{grid-column:2}.bulk-head,.bulk-foot{padding:12px;flex-wrap:wrap}}
+@media(max-width:850px){.wrap{padding:15px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.settings-grid{grid-template-columns:1fr}.title{font-size:23px}}
+</style></head>
+<body><main class="wrap">
+<header class="top"><div><div class="eyebrow">Manager · Finance · v4.1 Community</div><div class="title">Aged receivables</div><div class="sub">Outstanding sales invoices · prepare, review and send reminders in bulk</div></div><div class="actions"><button id="reload" class="primary">↻ Refresh invoices</button><button id="bulkSend" class="primary" disabled>Prepare bulk send (0)</button><button id="openSelected">Open selected in Manager</button></div></header>
+<details class="settings" id="settings"><summary>Connection settings</summary><div class="settings-grid"><div class="field"><label for="base">Manager server URL</label><input id="base" placeholder="http://127.0.0.1:8080" autocomplete="url"></div><div class="field"><label for="key">API2 key</label><input id="key" type="password" placeholder="Paste Manager API2 key" autocomplete="off"></div><div class="field"><label for="pageSize">Page size</label><input id="pageSize" type="number" min="25" max="250" step="25" value="100"></div></div><div class="field" style="margin-top:12px"><label for="emailTemplateUrl">Sales Invoice email template URL (used only if the invoice page has blank subject/message)</label><input id="emailTemplateUrl" value="" placeholder="Optional: enter your own Manager email-template URL" autocomplete="url"></div><div class="note">The API key is kept in this page’s local storage on this browser only. Invoices load through API2, then due dates are fetched separately with <code>fields=DueDate</code> so balance fields remain available.</div><div class="warning">Prepare reminder uses Manager’s native email template and a browser-rendered invoice PDF. Review everything before pressing Send; this extension never sends automatically.</div><div style="margin-top:12px"><button id="saveSettings" class="primary">Save settings &amp; load</button></div></details>
+<div id="message" class="message"></div>
+<section class="stats"><div class="stat"><div class="label">Outstanding balance</div><div class="num" id="totalOutstanding">—</div><div class="small">Across invoices loaded</div></div><div class="stat"><div class="label">Overdue</div><div class="num" id="overdueTotal">—</div><div class="small" id="overdueCount">Past due date</div></div><div class="stat"><div class="label">Due today</div><div class="num" id="todayTotal">—</div><div class="small" id="todayCount">Due date is today</div></div><div class="stat"><div class="label">Open invoices</div><div class="num" id="openCount">—</div><div class="small" id="customerCount">Outstanding records</div></div></section>
+<div class="toolbar"><input id="search" placeholder="Search customer or invoice reference…"><select id="filter"><option value="all">All outstanding</option><option value="overdue">Overdue only</option><option value="today">Due today</option><option value="future">Not yet due</option></select><select id="sort"><option value="oldest">Oldest due first</option><option value="largest">Largest balance first</option><option value="customer">Customer A–Z</option></select><span class="count" id="resultCount">Not loaded</span></div>
+<section class="panel"><div class="table-wrap"><table><thead><tr><th><input id="selectAll" class="check" type="checkbox" aria-label="Select all visible"></th><th>Customer / reference</th><th>Invoice date</th><th>Due date</th><th>Status</th><th style="text-align:right">Balance due</th><th>Action</th></tr></thead><tbody id="rows"><tr><td colspan="7" class="empty">Configure your Manager URL and API2 key, then refresh.</td></tr></tbody></table></div><div class="footer"><span id="pageInfo">—</span><div class="pages"><button id="prev">← Previous</button><button id="next">Next →</button></div></div></section>
+<p class="note">Bulk workflow: select up to 25 invoices, prepare and review each recipient, subject, message and PDF, then confirm sending. Emails are submitted one at a time through Manager’s native SendEmail handler.</p>
+<div id="bulkModal" class="bulk-overlay" aria-hidden="true">
+<div class="bulk-dialog" role="dialog" aria-modal="true" aria-labelledby="bulkTitle">
+<div class="bulk-head"><div><h2 id="bulkTitle">Review bulk reminders</h2><p id="bulkSummary">Prepare selected invoices before sending.</p></div><button id="closeBulk">Close</button></div>
+<div id="bulkProgress" class="bulk-progress">Select invoices and choose Prepare bulk send.</div>
+<div id="bulkList" class="bulk-list"><div class="empty">No invoices prepared yet.</div></div>
+<div class="bulk-foot"><button id="cancelBulk">Cancel / close</button><button id="sendBulk" class="primary" disabled>Send selected reminders</button></div>
+</div></div>
+</main>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);let allInvoices=[],page=0,totalRecords=0,selected=new Set(),busy=false,bulkBusy=false,bulkPrepared=[];const STORAGE='managerAgedReceivablesCommunityV41';
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const money=(n,currency)=>{n=Number(n)||0;try{return new Intl.NumberFormat(undefined,{style:'currency',currency:currency||'GBP'}).format(n)}catch{return n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}};
+const dateFmt=s=>{if(s==null||s==='')return '—';let raw=s;if(typeof raw==='object'){raw=raw.date??raw.value??raw.valueAsString??raw.isoDate??''}raw=String(raw);const m=raw.match(/^(\d{4}-\d{2}-\d{2})/);const d=m?new Date(m[1]+'T12:00:00'):new Date(raw);return !raw||isNaN(d)?'—':new Intl.DateTimeFormat(undefined,{day:'2-digit',month:'short',year:'numeric'}).format(d)};
+const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function notice(text,type='info'){const el=$('message');el.className='message show '+type;el.textContent=text}
+function clearNotice(){$('message').className='message'}
+function base(){return $('base').value.trim().replace(/\/+$/,'')}
+function settings(){return {base:base(),key:$('key').value.trim(),pageSize:Math.max(25,Math.min(250,Number($('pageSize').value)||100)),emailTemplateUrl:$('emailTemplateUrl').value.trim()}}
+function loadSettings(){try{const s=JSON.parse(localStorage.getItem(STORAGE)||'{}');$('base').value=s.base||'http://127.0.0.1:8080';$('key').value=s.key||'';$('pageSize').value=s.pageSize||100;$('emailTemplateUrl').value=s.emailTemplateUrl||''}catch{$('base').value=location.origin;$('emailTemplateUrl').value=''}}
+function saveSettings(){const s=settings();if(!s.base||!/^https?:\/\//i.test(s.base)){notice('Enter a valid Manager server URL, for example http://127.0.0.1:8080.','error');return false}if(!s.key){notice('Enter your Manager API2 key.','error');return false}if(s.emailTemplateUrl){try{const u=new URL(s.emailTemplateUrl,s.base);if(u.origin!==new URL(s.base).origin)throw new Error();s.emailTemplateUrl=u.href}catch{notice('The email-template URL must be a valid URL on the same Manager server.','error');return false}}localStorage.setItem(STORAGE,JSON.stringify(s));return true}
+function valueMoney(x){if(x&&typeof x==='object')return Number(x.value)||0;return Number(x)||0}
+function normalize(x){return {...x,_key:String(x.key||x.Key||''),_customer:String(x.customer||x.Customer||'Unknown customer'),_ref:String(x.reference||x.Reference||''),_issue:String(x.issueDate||x.IssueDate||''),_due:String(x.dueDate||x.DueDate||''),_balance:valueMoney(x.balanceDue??x.BalanceDue),_currency:(x.balanceDue&&x.balanceDue.currency)||(x.invoiceAmount&&x.invoiceAmount.currency)||'GBP',_status:String(x.status||x.Status||'')};}
+function isOpen(i){return Math.abs(i._balance)>0.000001 && !/paidinfull|voided|cancelled/i.test(i._status)}
+function age(i){if(!i._due)return 'future';if(i._due<today())return 'overdue';if(i._due===today())return 'today';return 'future'}
+function nativeUrl(i){const s=settings(),root=s.base;const enc=new TextEncoder();function encodeProto(bytes){let binary='';for(const b of bytes)binary+=String.fromCharCode(b);return btoa(binary).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_')}function varintInto(out,n){n=BigInt(n);while(n>127n){out.push(Number(n&127n)|128);n>>=7n}out.push(Number(n))}function fieldString(out,tag,str){const b=enc.encode(str);varintInto(out,(tag<<3)|2);varintInto(out,b.length);out.push(...b)}function fieldVarint(out,tag,n){varintInto(out,(tag<<3));varintInto(out,n)}function fieldBytes(out,tag,b){varintInto(out,(tag<<3)|2);varintInto(out,b.length);out.push(...b)}function guidSub(g){const h=String(g).replace(/[{}-]/g,'');if(!/^[0-9a-fA-F]{32}$/.test(h))throw new Error('Invoice key is not a GUID: '+g);const a=[];for(let j=0;j<32;j+=2)a.push(parseInt(h.slice(j,j+2),16));const b=[a[3],a[2],a[1],a[0],a[5],a[4],a[7],a[6],...a.slice(8)];return [9,...b.slice(0,8),17,...b.slice(8)]}const business=window.__businessName||'';if(!business)throw new Error('Business name is missing. Refresh the invoice list first.');const listBytes=[];fieldString(listBytes,100,business);const referrer='/sales-invoices?'+encodeProto(listBytes);const bytes=[];fieldString(bytes,100,business);fieldString(bytes,101,referrer);fieldBytes(bytes,200,guidSub(i._key));fieldVarint(bytes,201,0);fieldVarint(bytes,202,Math.max(0,totalRecords-1));fieldVarint(bytes,203,0);return root+'/sales-invoice-view?'+encodeProto(bytes)}
+function visible(){const q=$('search').value.trim().toLowerCase(),f=$('filter').value,s=$('sort').value;let a=allInvoices.filter(isOpen).filter(i=>{const ageKey=age(i);return (f==='all'||f===ageKey)&&(!q||(i._customer+' '+i._ref).toLowerCase().includes(q))});a.sort((x,y)=>s==='largest'?y._balance-x._balance:s==='customer'?x._customer.localeCompare(y._customer):(x._due||'9999').localeCompare(y._due||'9999'));return a}
+function render(){const a=visible();$('resultCount').textContent=`${a.length.toLocaleString()} visible`;const rows=$('rows');if(!a.length){rows.innerHTML='<tr><td colspan="7" class="empty">No invoices match this filter.</td></tr>'}else{rows.innerHTML=a.map(i=>{const k=i._key,ag=age(i),cl=ag==='overdue'?'overdue':ag==='today'?'today':'due',label=ag==='overdue'?'Overdue':ag==='today'?'Due today':'Not yet due';return `<tr><td><input class="check pick" type="checkbox" data-key="${escapeHtml(k)}" ${selected.has(k)?'checked':''} aria-label="Select invoice"></td><td><div class="customer">${escapeHtml(i._customer)}</div><div class="reference">${escapeHtml(i._ref||'No reference')}</div></td><td>${dateFmt(i._issue)}</td><td>${dateFmt(i._due)}</td><td><span class="status ${cl}">${label}</span></td><td class="money" style="text-align:right">${money(i._balance,i._currency)}</td><td class="row-actions"><button class="prepare" data-key="${escapeHtml(k)}">Prepare reminder ↗</button></td></tr>`}).join('')}
+rows.querySelectorAll('.pick').forEach(c=>c.addEventListener('change',()=>{if(c.checked)selected.add(c.dataset.key);else selected.delete(c.dataset.key);updateSelectAll()}));rows.querySelectorAll('.prepare').forEach(b=>b.addEventListener('click',()=>prepareReminder(b.dataset.key,b)));
+$('selectAll').checked=a.length>0&&a.every(i=>selected.has(i._key));$('pageInfo').textContent=`Showing all ${allInvoices.length.toLocaleString()} invoice records`; $('prev').disabled=true;$('next').disabled=true;updateBulkButton();
+const open=allInvoices.filter(isOpen),over=open.filter(i=>age(i)==='overdue'),due=open.filter(i=>age(i)==='today');$('totalOutstanding').textContent=money(open.reduce((n,i)=>n+i._balance,0),open[0]?open[0]._currency:'GBP');$('overdueTotal').textContent=money(over.reduce((n,i)=>n+i._balance,0),over[0]?over[0]._currency:'GBP');$('todayTotal').textContent=money(due.reduce((n,i)=>n+i._balance,0),due[0]?due[0]._currency:'GBP');$('overdueCount').textContent=`${over.length} invoice${over.length===1?'':'s'} past due`; $('todayCount').textContent=`${due.length} invoice${due.length===1?'':'s'} due today`; $('openCount').textContent=open.length.toLocaleString();$('customerCount').textContent=`${new Set(open.map(i=>i._customer)).size} customers`;
+}
+function updateSelectAll(){const a=visible();$('selectAll').checked=a.length>0&&a.every(i=>selected.has(i._key));updateBulkButton();}
+function updateBulkButton(){const count=[...selected].filter(k=>allInvoices.some(i=>i._key===k&&isOpen(i))).length;$('bulkSend').textContent=bulkBusy?`Preparing…`:`Prepare bulk send (${count})`;$('bulkSend').disabled=bulkBusy||count===0;}
+async function refresh(reset=true){if(busy)return;if(!saveSettings())return;clearNotice();page=0;busy=true;$('reload').disabled=true;$('reload').innerHTML='<span class="loading"></span>Loading';const s=settings();try{const getPage=async(skip,fields='')=>{const params=new URLSearchParams({pageSize:String(s.pageSize),skip:String(skip)});if(fields)params.set('fields',fields);const url=`${s.base}/api2/sales-invoices?${params}`;const res=await fetch(url,{headers:{'X-API-KEY':s.key,'Accept':'application/json'},cache:'no-store'});if(!res.ok)throw new Error(`Manager API2 returned HTTP ${res.status} at offset ${skip}${fields?' (fields='+fields+')':''}. Check the server URL, API2 key and API2 access.`);return await res.json()};const first=await getPage(0);totalRecords=Number(first.totalRecords??first.TotalRecords??(first.salesInvoices||first.SalesInvoices||[]).length);window.__businessName=first.business?.name||first.Business?.Name||'';if(!window.__businessName)throw new Error('The response did not include the business name, so native invoice links cannot be built safely.');let batch=(first.salesInvoices||first.SalesInvoices||[]).map(normalize);const mergeDates=async(skip,records)=>{const dates=await getPage(skip,'DueDate');const ds=dates.salesInvoices||dates.SalesInvoices||[];const map=new Map(ds.map(x=>[String(x.key||x.Key||''),x.dueDate??x.DueDate??'']));for(const i of records){const d=map.get(i._key);if(d!==undefined&&d!==null&&d!=='')i._due=String(d)}};await mergeDates(0,batch);for(let skip=batch.length;skip<totalRecords;skip+=s.pageSize){$('reload').innerHTML=`<span class="loading"></span>Loading ${Math.min(skip+s.pageSize,totalRecords)} / ${totalRecords}`;const next=await getPage(skip);const records=(next.salesInvoices||next.SalesInvoices||[]).map(normalize);if(!records.length)break;await mergeDates(skip,records);batch=batch.concat(records)}allInvoices=batch;totalRecords=batch.length;selected=new Set([...selected].filter(k=>allInvoices.some(i=>i._key===k)));render();notice(`Loaded ${batch.length.toLocaleString()} invoices from ${window.__businessName}.`,'ok');}catch(e){notice(`${e.message||e} If this is an embedded extension, ensure Manager allows API2 requests from its origin.`, 'error');$('rows').innerHTML='<tr><td colspan="7" class="empty">Could not load invoices. See the message above.</td></tr>'}finally{busy=false;$('reload').disabled=false;$('reload').textContent='↻ Refresh invoices';render()}}
+function openInvoice(key){const i=allInvoices.find(x=>x._key===key);if(!i)return;try{const url=nativeUrl(i);window.open(url,'_blank','noopener');notice(`Opened invoice ${i._ref||key} in Manager.`,'ok')}catch(e){notice(e.message,'error')}}
+function fieldValue(form,name){const el=form.querySelector(`[name="${CSS.escape(name)}"]`);return el?el.value:''}
+function dataUrlBase64(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onloadend=()=>{const v=String(r.result||'');const comma=v.indexOf(',');if(comma<0)reject(new Error('Could not encode the invoice PDF.'));else resolve(v.slice(comma+1))};r.onerror=()=>reject(new Error('Could not read the invoice PDF.'));r.readAsDataURL(blob)})}
+async function inlineImages(doc,documentUrl){const images=[...doc.querySelectorAll('img')];await Promise.all(images.map(async img=>{const src=img.getAttribute('src');if(!src||/^(data:|blob:)/i.test(src))return;try{const url=new URL(src,documentUrl);if(!/^https?:$/.test(url.protocol))return;const r=await fetch(url.href,{credentials:'include',cache:'no-store'});if(!r.ok)return;img.src=await dataUrlBase64BlobUrl(await r.blob())}catch{}}))}
+function ensureBase(doc,url){let b=doc.querySelector('base');if(!b){b=doc.createElement('base');doc.head?.prepend(b)}b.href=url}
+function waitForLoad(el,timeout=10000){return new Promise((resolve,reject)=>{if(el?.contentDocument?.readyState==='complete'){resolve();return}let done=false;const finish=(err)=>{if(done)return;done=true;clearTimeout(timer);el?.removeEventListener('load',onload);err?reject(err):resolve()};const onload=()=>finish();const timer=setTimeout(()=>finish(new Error('Timed out while rendering the invoice in the browser.')),timeout);el?.addEventListener('load',onload,{once:true})})}
+async function renderInvoiceForPdf(outerSrcdoc,managerBase,invoice){
+ const outerDoc=new DOMParser().parseFromString(outerSrcdoc,'text/html');ensureBase(outerDoc,managerBase+'/');
+ const innerFrame=outerDoc.querySelector('#iframeView');if(!innerFrame)throw new Error('The printable invoice template did not contain its inner invoice frame.');
+ const innerSrcdoc=innerFrame.getAttribute('srcdoc');if(!innerSrcdoc)throw new Error('Manager did not provide the printable invoice template.');
+ const innerDoc=new DOMParser().parseFromString(innerSrcdoc,'text/html');ensureBase(innerDoc,managerBase+'/');innerFrame.setAttribute('srcdoc','<!doctype html>\n'+innerDoc.documentElement.outerHTML);
+ const frame=document.createElement('iframe');frame.setAttribute('aria-hidden','true');frame.style.cssText='position:fixed;left:-20000px;top:0;width:1200px;height:1800px;border:0;opacity:0;pointer-events:none';
+ const outerHtml='<!doctype html>\n'+outerDoc.documentElement.outerHTML;const outerLoaded=waitForLoad(frame,12000);frame.srcdoc=outerHtml;document.body.appendChild(frame);
+ try{
+  await outerLoaded;let nested=null;const deadline=Date.now()+12000;
+  while(Date.now()<deadline){nested=frame.contentDocument?.querySelector('#iframeView');if(nested?.contentDocument?.body)break;await new Promise(r=>setTimeout(r,100))}
+  if(!nested?.contentDocument?.body)throw new Error('The invoice frame did not load.');
+  // The invoice theme requests its data from the parent with postMessage. The
+  // surrounding Manager view contains the matching context-response handler.
+  // Wait until that handler has populated real invoice values into the theme.
+  const ref=String(invoice._ref||'').trim(),customer=String(invoice._customer||'').trim();let rendered=false;
+  for(let n=0;n<100;n++){
+   const d=nested.contentDocument;const text=(d.body?.innerText||d.body?.textContent||'').replace(/\s+/g,' ').trim();
+   if(text.length>300&&((ref&&text.includes(ref))||(customer&&text.includes(customer)))){rendered=true;break}
+   await new Promise(r=>setTimeout(r,100));
+  }
+  if(!rendered)throw new Error('Manager’s invoice template did not finish rendering. Open the invoice in Manager once, then try again.');
+  const doc=nested.contentDocument;
+  // Preserve QR codes/canvas output before scripts are removed for PDF rendering.
+  for(const canvas of [...doc.querySelectorAll('canvas')]){try{const img=doc.createElement('img');img.src=canvas.toDataURL('image/png');img.width=canvas.width;img.height=canvas.height;canvas.replaceWith(img)}catch{}}
+  await inlineImages(doc,managerBase+'/');ensureBase(doc,managerBase+'/');
+  doc.querySelectorAll('script').forEach(x=>x.remove());
+  return '<!doctype html>\n'+doc.documentElement.outerHTML;
+ }finally{frame.remove()}
+}
+async function loadLiquidEngine(pageDoc,invoiceUrl){
+ if(window.liquidjs?.Liquid)return;
+ const src=pageDoc.querySelector('script[src*="liquidjs"]')?.getAttribute('src');
+ if(!src)throw new Error('Manager’s Liquid template engine was not found on the invoice page.');
+ const url=new URL(src,invoiceUrl).href;
+ await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=url;script.onload=resolve;script.onerror=()=>reject(new Error('Could not load Manager’s email template engine.'));document.head.appendChild(script)});
+ if(!window.liquidjs?.Liquid)throw new Error('Manager’s email template engine did not initialise.');
+}
+
+function dataUrlBase64BlobUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=reject;r.readAsDataURL(blob)})}
+
+function readControlValue(doc, names){
+ const wanted=new Set(names.map(x=>x.toLowerCase()));
+ for(const el of [...doc.querySelectorAll('input,textarea,select')]){
+  const n=String(el.name||el.id||'').toLowerCase();
+  if(!wanted.has(n))continue;
+  const v=String(el.value??el.getAttribute('value')??el.textContent??'');
+  if(v.trim())return v;
+ }
+ // Some Manager form versions render values in a serialized Vue state block.
+ for(const script of [...doc.querySelectorAll('script')]){
+  const txt=script.textContent||'';
+  for(const name of names){
+   const re=new RegExp(`[\"']${name}[\"']\\s*:\\s*(\"(?:(?:\\\\.)|[^\"\\\\])*\")`,'i');
+   const m=txt.match(re);
+   if(m){try{const v=JSON.parse(m[1]);if(typeof v==='string'&&v.trim())return v}catch{}}
+  }
+ }
+ return '';
+}
+
+const DEFAULT_SUBJECT_TEMPLATE="Invoice Number '{{ reference }}' due to {{ business.name }}";
+const DEFAULT_BODY_TEMPLATE="{% for total in table.totals %}{% if total.label == 'Total' %}{% capture invoice_total%}{{ total.text }}{% endcapture %}{% endif %}{% endfor %} {% for field in fields %}{% if field.label == 'Invoice date' %}{% capture invoice_date %}{{ field.text }}{% endcapture %}{% endif %}{% endfor %} {% for field in fields %}{% if field.label == 'Due date' %}{% capture due_date %}{{ field.text }}{% endcapture %}{% endif %}{% endfor %} {% capture if_due_date %}{% if due_date == null %}.{% else %} due by {{ due_date }}.{% endif %}{% endcapture %} {% for total in table.totals %}{% if total.label == 'Balance due' %}{% capture balance_due %}{{ total.text }}{% endcapture %}{% endif %}{% endfor %} {% capture if_balance_due %}{% if balance_due == null%}{{ invoice_total }},{{if_due_date}}{% else %}{% if balance_due == \"\u00a3 0.00\" %}{{ balance_due }}.{% else %}{{ balance_due }},{{if_due_date}}{% endif %}{% endif %}{% endcapture %}  Dear {{ recipient.name }},  Please find attached {{ business.name }} Invoice.  Invoice number '{{ reference }}' for {{ description }}. Invoice date {{invoice_date}}.  The invoice value is {{ invoice_total }}. The balance due is {{if_balance_due }}  Please use the payment details shown on the invoice and quote the invoice number as your payment reference.  If you have any queries, please contact the business using the contact details shown on the invoice.  Many thanks,  {{ business.name }}";
+
+async function getConfiguredEmailTemplate(s, invoiceUrl, pageDoc, formSubject, formBody){
+ if(formSubject.trim()&&formBody.trim())return {subject:formSubject,body:formBody,source:'invoice page'};
+ if(!s.emailTemplateUrl)throw new Error('The invoice page has blank email templates and no Sales Invoice email-template URL is configured.');
+ const url=new URL(s.emailTemplateUrl,s.base);
+ if(url.origin!==new URL(s.base).origin)throw new Error('The email-template URL must be on the same Manager server.');
+ const res=await fetch(url.href,{headers:{Accept:'text/html'},credentials:'include',cache:'no-store'});
+ if(!res.ok)throw new Error(`Could not load the Sales Invoice email template (HTTP ${res.status}).`);
+ const text=await res.text();
+ if(/<title>\s*(login|sign in)/i.test(text.slice(0,5000)))throw new Error('Manager returned a login page for the email template. Open Manager in this browser and retry.');
+ const doc=new DOMParser().parseFromString(text,'text/html');
+ let subject=readControlValue(doc,['Subject']);
+ let body=readControlValue(doc,['MessageBody','Body','Message','EmailBody']);
+ if(!subject.trim()&&!body.trim()){
+  // The template may be stored in a Vue model script or data attribute.
+  const all=doc.documentElement.outerHTML;
+  const extract=(names)=>{
+   for(const name of names){
+    const patterns=[
+     new RegExp(`(?:name|id)=[\"']${name}[\"'][^>]*value=[\"']([^\"']*)[\"']`,'i'),
+     new RegExp(`[\"']${name}[\"']\\s*:\\s*[\"']([^\"']*)[\"']`,'i')
+    ];
+    for(const p of patterns){const m=all.match(p);if(m&&m[1])return m[1].replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')}
+   }
+   return '';
+  };
+  subject=extract(['Subject']);body=extract(['MessageBody','Body','Message','EmailBody']);
+ }
+ if(!subject.trim()&&!body.trim()){
+  // In Manager 25.12 the email template fields are populated by page JavaScript.
+  // A fetch + DOMParser does not execute that JavaScript, so use the user's
+  // captured Sales Invoice templates as a reliable fallback.
+  subject=DEFAULT_SUBJECT_TEMPLATE;
+  body=DEFAULT_BODY_TEMPLATE;
+ }
+ subject=formSubject.trim()?formSubject:subject;
+ body=formBody.trim()?formBody:body;
+ return {subject,body,source:(formSubject.trim()||formBody.trim())?'invoice page + template settings':'Sales Invoice email template (captured fallback)'};
+}
+
+async function prepareReminder(key,button){
+ const i=allInvoices.find(x=>x._key===key);if(!i)return;const s=settings();let tab=null;const target='managerReminder_'+Date.now();
+ try{
+  tab=window.open('about:blank',target);if(!tab)throw new Error('The browser blocked the new tab. Allow pop-ups for this extension and try again.');
+  if(button){button.disabled=true;button.textContent='Preparing…'}notice(`Preparing Manager’s email form for invoice ${i._ref||key}…`,'info');
+  const invoiceUrl=nativeUrl(i);const pageRes=await fetch(invoiceUrl,{headers:{'Accept':'text/html'},credentials:'include',cache:'no-store'});if(!pageRes.ok)throw new Error(`Could not load the invoice page (HTTP ${pageRes.status}).`);
+  const pageHtml=await pageRes.text();if(/<title>\s*(login|sign in)/i.test(pageHtml.slice(0,5000)))throw new Error('Manager returned a login page instead of the invoice. Open Manager in this browser first, then retry.');
+  const pageDoc=new DOMParser().parseFromString(pageHtml,'text/html');
+  // A fetched HTML document does not execute Manager's scripts. Its email form can
+  // therefore look present while the live values/Variables are still missing.
+  // Load the invoice in a real same-origin iframe and read the form after Manager
+  // has run its own page scripts, matching the native Email button workflow.
+  const liveFrame=document.createElement('iframe');
+  liveFrame.setAttribute('aria-hidden','true');
+  liveFrame.style.cssText='position:fixed;left:-12000px;top:0;width:1280px;height:900px;border:0;opacity:0;pointer-events:none';
+  document.body.appendChild(liveFrame);
+  let liveDoc=null, emailForm=null;
+  try {
+    await new Promise((resolve,reject)=>{
+      const timer=setTimeout(()=>reject(new Error('Timed out loading the live invoice page for its email template.')),15000);
+      liveFrame.onload=()=>{clearTimeout(timer);resolve()};
+      liveFrame.onerror=()=>{clearTimeout(timer);reject(new Error('Could not load the live invoice page in a hidden frame.'))};
+      liveFrame.src=invoiceUrl;
+    });
+    for(let n=0;n<120;n++){
+      liveDoc=liveFrame.contentDocument;
+      emailForm=liveDoc&&[...liveDoc.querySelectorAll('form')].find(f=>f.querySelector('[name="2be520d4-1fa1-4118-a5a5-627e0576a1c4"]')&&f.querySelector('[name="To"]')&&f.querySelector('[name="Subject"]')&&f.querySelector('[name="Variables"]'));
+      const vars=emailForm?.querySelector('[name="Variables"]')?.value||'';
+      if(emailForm && vars.trim()) {
+        try { JSON.parse(vars); if(emailForm.querySelector('[name="Subject"]')?.value?.trim() && emailForm.querySelector('[name="Body"]')?.value?.trim()) break; } catch {}
+      }
+      await new Promise(r=>setTimeout(r,100));
+    }
+    if(!emailForm)throw new Error('Manager’s live invoice page did not expose its native Email form.');
+  } catch(e) {
+    liveFrame.remove();
+    throw e;
+  }
+  const outerFrame=pageDoc.querySelector('#iframeView');const outerSrcdoc=outerFrame?.getAttribute('srcdoc');
+  if(!outerSrcdoc)throw new Error('Manager did not include the printable invoice template in the invoice page.');
+  const pdfHtml=await renderInvoiceForPdf(outerSrcdoc,s.base,i);
+  const pdfData=new FormData();pdfData.append('Html',pdfHtml);
+  const pdfRes=await fetch(s.base+'/pdf',{method:'POST',body:pdfData,credentials:'include',cache:'no-store'});
+  if(!pdfRes.ok)throw new Error(`Manager could not generate the invoice PDF (HTTP ${pdfRes.status}).`);
+  const type=pdfRes.headers.get('Content-Type')||'';if(!type.toLowerCase().includes('application/pdf'))throw new Error('Manager did not return a PDF. Check that the printable invoice is accessible in Manager.');
+  const pdfBase64=await dataUrlBase64(await pdfRes.blob());
+  const field=name=>{const el=emailForm.querySelector(`[name="${CSS.escape(name)}"]`);return el?(el.value??el.getAttribute('value')??el.textContent??''):''};
+  // Submit Manager's original hidden Email form rather than rebuilding it.
+  // BaseView3.cs supplies To, Subject, Body and Variables on this form; EmailForm.cs
+  // reads those exact fields and runs LiquidJS. Reconstructing a second form can
+  // lose the native values and was consistent with the blank fields observed.
+  const variablesRaw=field('Variables');
+  if(!variablesRaw)throw new Error('Manager’s original invoice email form has an empty Variables field.');
+  try{JSON.parse(variablesRaw)}catch{throw new Error('Manager’s original invoice email form contains invalid Variables JSON.');}
+  const to=field('To').trim();
+  const subjectTemplate=field('Subject').trim()||DEFAULT_SUBJECT_TEMPLATE;
+  const bodyTemplate=field('Body').trim()||DEFAULT_BODY_TEMPLATE;
+  const variables=JSON.parse(variablesRaw);
+  const pdfInput=emailForm.querySelector('[name="2be520d4-1fa1-4118-a5a5-627e0576a1c4"]');
+  const filenameInput=emailForm.querySelector('[name="Filename"]');
+  if(!pdfInput||!filenameInput)throw new Error('Manager’s original invoice email form is missing its PDF or Filename field.');
+  let filename='';
+  try{filename=String(liveFrame.contentWindow.getIframeTitle?.()||'').trim()}catch{}
+  if(!filename)filename=field('Filename').trim();
+  if(!filename)filename=`Invoice ${i._ref||key}`;
+  pdfInput.value=pdfBase64;
+  filenameInput.value=filename;
+  emailForm.target=target;
+  emailForm.method='POST';
+  emailForm.enctype='application/x-www-form-urlencoded';
+  // Native submit bypasses HTMX and preserves Manager's original form context.
+  HTMLFormElement.prototype.submit.call(emailForm);
+
+  // Manager 25.12.21.3153 sometimes returns the email form with To populated but
+  // Subject/Body blank because the LiquidJS initialization does not finish in this
+  // programmatic navigation. Wait for that page, then render the exact template
+  // strings against the Variables JSON and set the visible controls explicitly.
+  let emailDoc=null, subjectControl=null, bodyControl=null;
+  const deadline=Date.now()+12000;
+  while(Date.now()<deadline){
+    try{
+      if(!tab.closed && tab.location.href!=='about:blank'){
+        emailDoc=tab.document;
+        subjectControl=emailDoc.querySelector('input[name="Subject"]');
+        bodyControl=emailDoc.querySelector('textarea[name="Body"],input[name="Body"]');
+        if(subjectControl&&bodyControl)break;
+      }
+    }catch{}
+    await new Promise(r=>setTimeout(r,100));
+  }
+  if(!emailDoc||!subjectControl||!bodyControl)throw new Error('The native email form opened, but its Subject and Body controls could not be accessed to finish template rendering.');
+
+  // Give Manager's own LiquidJS script a brief chance to complete.
+  await new Promise(r=>setTimeout(r,500));
+  if(!subjectControl.value.trim()||!bodyControl.value.trim()){
+    let liquid=tab.liquidjs?.Liquid?tab.liquidjs:null;
+    if(!liquid){
+      const scripts=[...emailDoc.querySelectorAll('script[src]'),...pageDoc.querySelectorAll('script[src]')];
+      const liquidScript=scripts.map(x=>x.src||x.getAttribute('src')).find(x=>/liquidjs/i.test(x));
+      if(liquidScript){
+        await new Promise((resolve,reject)=>{
+          const script=emailDoc.createElement('script');
+          script.src=new URL(liquidScript,tab.location.href).href;
+          script.onload=resolve;
+          script.onerror=()=>reject(new Error('Could not load Manager’s LiquidJS library to render the email template.'));
+          emailDoc.head.appendChild(script);
+        });
+        liquid=tab.liquidjs?.Liquid?tab.liquidjs:null;
+      }
+    }
+    if(!liquid?.Liquid)throw new Error('The email form is open, but its Subject and Body remain blank and Manager’s LiquidJS library could not be loaded.');
+    const engine=new liquid.Liquid();
+    const renderedSubject=(await engine.parseAndRender(subjectTemplate,variables)).trim();
+    const renderedBody=(await engine.parseAndRender(bodyTemplate,variables)).trim();
+    subjectControl.value=renderedSubject;
+    bodyControl.value=renderedBody;
+    subjectControl.dispatchEvent(new Event('input',{bubbles:true}));
+    bodyControl.dispatchEvent(new Event('input',{bubbles:true}));
+    subjectControl.dispatchEvent(new Event('change',{bubbles:true}));
+    bodyControl.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  liveFrame.remove();
+  if(!to)notice(`Manager’s native email form opened for invoice ${i._ref||key}, with the PDF attached. Its recipient is blank, so enter the address before sending.`,'info');
+  else notice(`Manager’s native email form opened for invoice ${i._ref||key}; recipient, subject and message are ready with the PDF attached. Review everything before sending.`,'ok');
+ }catch(e){if(tab&&!tab.closed){try{tab.location.href=nativeUrl(i)}catch{}}notice(`Could not prepare the native email form: ${e.message||e} ${tab?'The selected invoice has been opened instead.':''}`,'error')}
+ finally{if(button){button.disabled=false;button.textContent='Prepare reminder ↗'}}
+}
+
+function showBulkModal(){ $('bulkModal').classList.add('show');$('bulkModal').setAttribute('aria-hidden','false'); }
+function hideBulkModal(){ if(bulkBusy)return; $('bulkModal').classList.remove('show');$('bulkModal').setAttribute('aria-hidden','true'); }
+function bulkStatusText(item){
+ if(item.status==='preparing')return 'Preparing…';
+ if(item.status==='ready')return 'Ready to send';
+ if(item.status==='sending')return 'Sending…';
+ if(item.status==='sent')return 'Sent';
+ if(item.status==='failed')return 'Failed';
+ if(item.status==='skipped')return 'Skipped';
+ return 'Waiting';
+}
+function renderBulkList(){
+ const list=$('bulkList');
+ if(!bulkPrepared.length){list.innerHTML='<div class="empty">No invoices prepared yet.</div>';return}
+ list.innerHTML=bulkPrepared.map((x,idx)=>{
+  const ready=x.status==='ready';
+  const checked=ready?'checked':'';
+  const disabled=ready?'':'disabled';
+  const stateClass=x.status==='sent'?'sent':x.status==='failed'?'failed':x.status==='sending'?'sending':ready?'ready':'';
+  return `<div class="bulk-row" data-bulk-row="${idx}">
+   <input type="checkbox" class="check bulk-pick" data-bulk-index="${idx}" ${checked} ${disabled} aria-label="Include this reminder">
+   <div class="bulk-main">
+    <div class="bulk-title">${escapeHtml(x.invoice._customer)} · ${escapeHtml(x.invoice._ref||'No reference')}</div>
+    <div class="bulk-meta">Due ${escapeHtml(dateFmt(x.invoice._due))} · Balance ${escapeHtml(money(x.invoice._balance,x.invoice._currency))}</div>
+    ${x.to?`<div class="bulk-meta"><b>To:</b> ${escapeHtml(x.to)}</div>`:''}
+    ${x.subject?`<div class="bulk-subject"><b>Subject:</b> ${escapeHtml(x.subject)}</div>`:''}
+    ${x.body?`<details class="bulk-preview"><summary>Preview message</summary><pre>${escapeHtml(x.body)}</pre></details>`:''}
+    ${x.error?`<div class="bulk-error">${escapeHtml(x.error)}</div>`:''}
+   </div>
+   <div class="bulk-state ${stateClass}">${escapeHtml(bulkStatusText(x))}</div>
+  </div>`;
+ }).join('');
+ list.querySelectorAll('.bulk-pick').forEach(c=>c.addEventListener('change',updateBulkSendButton));
+ updateBulkSendButton();
+}
+function updateBulkSendButton(){
+ const count=[...$('bulkList').querySelectorAll('.bulk-pick:checked')].length;
+ $('sendBulk').textContent=bulkBusy? 'Working…' : `Send ${count} selected reminder${count===1?'':'s'}`;
+ $('sendBulk').disabled=bulkBusy||count===0;
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+async function waitForFrameDocument(frame,predicate,timeout=18000,description='Manager page'){
+ const deadline=Date.now()+timeout;
+ while(Date.now()<deadline){
+  try{const doc=frame.contentDocument;if(doc&&predicate(doc))return doc}catch{}
+  await sleep(100);
+ }
+ throw new Error(`Timed out waiting for ${description}.`);
+}
+async function prepareBulkEmail(invoice,s){
+ const invoiceUrl=nativeUrl(invoice);
+ const pageRes=await fetch(invoiceUrl,{headers:{Accept:'text/html'},credentials:'include',cache:'no-store'});
+ if(!pageRes.ok)throw new Error(`Could not load invoice page (HTTP ${pageRes.status}).`);
+ const pageHtml=await pageRes.text();
+ if(/<title>\s*(login|sign in)/i.test(pageHtml.slice(0,5000)))throw new Error('Manager returned a login page. Open Manager in this browser and retry.');
+ const pageDoc=new DOMParser().parseFromString(pageHtml,'text/html');
+ const outerFrame=pageDoc.querySelector('#iframeView');
+ const outerSrcdoc=outerFrame?.getAttribute('srcdoc');
+ if(!outerSrcdoc)throw new Error('Manager did not include the printable invoice template.');
+ const frame=document.createElement('iframe');
+ const frameName='managerBulk_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+ frame.name=frameName;frame.setAttribute('aria-hidden','true');
+ frame.style.cssText='position:fixed;left:-20000px;top:0;width:1280px;height:900px;border:0;opacity:0;pointer-events:none';
+ document.body.appendChild(frame);
+ try{
+  await new Promise((resolve,reject)=>{
+   const timer=setTimeout(()=>reject(new Error('Timed out loading the invoice page.')),15000);
+   frame.onload=()=>{clearTimeout(timer);resolve()};
+   frame.onerror=()=>{clearTimeout(timer);reject(new Error('Could not load invoice page in the background.'))};
+   frame.src=invoiceUrl;
+  });
+  const invoiceDoc=frame.contentDocument;
+  const sourceForm=[...invoiceDoc.querySelectorAll('form')].find(f=>f.querySelector('[name="2be520d4-1fa1-4118-a5a5-627e0576a1c4"]')&&f.querySelector('[name="To"]')&&f.querySelector('[name="Subject"]')&&f.querySelector('[name="Variables"]'));
+  if(!sourceForm)throw new Error('Manager’s original email form was not found on the invoice page.');
+  const field=name=>{const el=sourceForm.querySelector(`[name="${CSS.escape(name)}"]`);return el?(el.value??el.getAttribute('value')??''):''};
+  const variablesRaw=field('Variables');
+  if(!variablesRaw)throw new Error('Manager did not supply invoice template variables.');
+  let variables;try{variables=JSON.parse(variablesRaw)}catch{throw new Error('Manager supplied invalid invoice template variables.')}
+  const to=field('To').trim()||String(variables?.recipient?.email||'').trim();
+  if(!to)throw new Error('No recipient email address is saved for this customer.');
+  const subjectTemplate=field('Subject').trim()||DEFAULT_SUBJECT_TEMPLATE;
+  const bodyTemplate=field('Body').trim()||DEFAULT_BODY_TEMPLATE;
+  const pdfHtml=await renderInvoiceForPdf(outerSrcdoc,s.base,invoice);
+  const pdfData=new FormData();pdfData.append('Html',pdfHtml);
+  const pdfRes=await fetch(s.base+'/pdf',{method:'POST',body:pdfData,credentials:'include',cache:'no-store'});
+  if(!pdfRes.ok)throw new Error(`Manager could not generate invoice PDF (HTTP ${pdfRes.status}).`);
+  if(!(pdfRes.headers.get('Content-Type')||'').toLowerCase().includes('application/pdf'))throw new Error('Manager did not return a PDF.');
+  const pdfBase64=await dataUrlBase64(await pdfRes.blob());
+  const pdfInput=sourceForm.querySelector('[name="2be520d4-1fa1-4118-a5a5-627e0576a1c4"]');
+  const filenameInput=sourceForm.querySelector('[name="Filename"]');
+  if(!pdfInput||!filenameInput)throw new Error('The original form is missing its PDF or filename field.');
+  let filename='';
+  try{filename=String(frame.contentWindow.getIframeTitle?.()||'').trim()}catch{}
+  if(!filename)filename=field('Filename').trim();
+  if(!filename)filename=`Invoice ${invoice._ref||invoice._key}`;
+  pdfInput.value=pdfBase64;filenameInput.value=filename;
+  sourceForm.target=frameName;sourceForm.method='POST';sourceForm.enctype='application/x-www-form-urlencoded';
+  // Post the original invoice-view form into the hidden frame; this invokes Manager's
+  // native EmailForm handler and lets its own page JavaScript run.
+  const oldDoc=invoiceDoc;
+  HTMLFormElement.prototype.submit.call(sourceForm);
+  const emailDoc=await waitForFrameDocument(frame,doc=>!!doc.querySelector('form#EmailForm'),18000,'native email form');
+  const sendForm=emailDoc.querySelector('form#EmailForm');
+  // In Manager 25.12, controls may be siblings of <form id="EmailForm"> and linked
+  // using form="EmailForm", rather than descendants of the form element. HTMLFormElement
+  // exposes those controls through .elements, while sendForm.querySelector() cannot see them.
+  if(!sendForm)throw new Error('Manager’s native email form did not load.');
+  const toControl=sendForm.elements.namedItem('To')||emailDoc.querySelector('[name="To"][form="EmailForm"]');
+  const subjectControl=sendForm.elements.namedItem('Subject')||emailDoc.querySelector('[name="Subject"][form="EmailForm"]');
+  const bodyControl=sendForm.elements.namedItem('Body')||emailDoc.querySelector('[name="Body"][form="EmailForm"]');
+  if(!toControl||!subjectControl||!bodyControl) {
+   const found=[...emailDoc.querySelectorAll('input,textarea')].filter(el=>['To','Subject','Body'].includes(el.name)).map(el=>`${el.name} (form=${el.getAttribute('form')||'none'})`).join(', ')||'none';
+   throw new Error(`Manager’s email form controls could not be found. Fields detected: ${found}.`);
+  }
+  // Let Manager's own LiquidJS rendering run. The known-good single-invoice version
+  // falls back to the same LiquidJS library if the older Manager page leaves fields blank.
+  await sleep(700);
+  let subject=String(subjectControl.value||'').trim();
+  let body=String(bodyControl.value||'').trim();
+  if(!subject||!body){
+   await loadLiquidEngine(pageDoc,invoiceUrl);
+   const engine=new window.liquidjs.Liquid();
+   if(!subject)subject=(await engine.parseAndRender(subjectTemplate,variables)).trim();
+   if(!body)body=(await engine.parseAndRender(bodyTemplate,variables)).trim();
+   subjectControl.value=subject;bodyControl.value=body;
+  }
+  if(!subject||!body)throw new Error('The email subject or message remained blank after template rendering.');
+  const finalTo=String(toControl.value||to).trim();
+  if(!finalTo)throw new Error('No recipient email address is available.');
+  const pdfFinal=emailDoc.querySelector('input[name="PDF"]')?.value||pdfBase64;
+  const finalFilename=emailDoc.querySelector('input[name="Filename"]')?.value||filename;
+  const action=sendForm.getAttribute('action');
+  if(!action)throw new Error('Manager did not provide the native SendEmail URL.');
+  const sendUrl=new URL(action,emailDoc.location.href).href;
+  const attachments=[...emailDoc.querySelectorAll('[name="Attachments"]:checked')].map(el=>el.value);
+  return {invoice,to:finalTo,subject,body,pdf:pdfFinal,filename:finalFilename,sendUrl,attachments,status:'ready'};
+ } finally {frame.remove()}
+}
+function renderBulkPreparedItem(invoice,status='waiting'){return {invoice,status,to:'',subject:'',body:'',pdf:'',filename:'',sendUrl:'',attachments:[],error:''}}
+async function prepareBulkBatch(){
+ if(bulkBusy)return;
+ if(!saveSettings())return;
+ const chosen=[...selected].map(k=>allInvoices.find(i=>i._key===k)).filter(i=>i&&isOpen(i));
+ if(!chosen.length){notice('Select at least one outstanding invoice first.','info');return}
+ if(chosen.length>25){notice('For safety and reliability, prepare no more than 25 reminders per batch. Select 25 or fewer invoices and try again.','error');return}
+ bulkBusy=true;updateBulkButton();bulkPrepared=chosen.map(i=>renderBulkPreparedItem(i,'waiting'));
+ $('bulkSummary').textContent=`Preparing ${chosen.length} selected invoice${chosen.length===1?'':'s'}. No emails will be sent until you confirm.`;
+ $('bulkProgress').textContent='Preparing invoices and PDFs one at a time…';
+ showBulkModal();renderBulkList();
+ for(let idx=0;idx<bulkPrepared.length;idx++){
+  const item=bulkPrepared[idx];item.status='preparing';$('bulkProgress').textContent=`Preparing ${idx+1} of ${bulkPrepared.length}: ${item.invoice._customer} · ${item.invoice._ref||'No reference'}`;renderBulkList();
+  try{Object.assign(item,await prepareBulkEmail(item.invoice,settings()));item.status='ready'}
+  catch(e){item.status='failed';item.error=String(e?.message||e)}
+  renderBulkList();
+ }
+ const ready=bulkPrepared.filter(x=>x.status==='ready').length,failed=bulkPrepared.length-ready;
+ $('bulkSummary').textContent=`Prepared ${ready} reminder${ready===1?'':'s'} successfully; ${failed} need attention. Review each recipient, subject and message below.`;
+ $('bulkProgress').textContent='Nothing has been sent yet. Untick any reminders you do not want to send, then choose Send selected reminders.';
+ bulkBusy=false;updateBulkButton();renderBulkList();
+}
+async function sendBulkBatch(){
+ if(bulkBusy)return;
+ const indexes=[...$('bulkList').querySelectorAll('.bulk-pick:checked')].map(c=>Number(c.dataset.bulkIndex));
+ const items=indexes.map(i=>bulkPrepared[i]).filter(x=>x&&x.status==='ready');
+ if(!items.length){notice('There are no prepared reminders selected to send.','info');return}
+ if(!confirm(`Send ${items.length} reminder email${items.length===1?'':'s'} through Manager now? This will send real emails. Please review every recipient, subject and message first.`))return;
+ bulkBusy=true;updateBulkButton();updateBulkSendButton();
+ let sent=0,failed=0;
+ for(let n=0;n<items.length;n++){
+  const item=items[n];item.status='sending';$('bulkProgress').textContent=`Sending ${n+1} of ${items.length}: ${item.invoice._customer} · ${item.invoice._ref||'No reference'}`;renderBulkList();
+  try{
+   const params=new URLSearchParams();
+   params.set('To',item.to);params.set('Subject',item.subject);params.set('Body',item.body);params.set('PDF',item.pdf);params.set('Filename',item.filename);
+   for(const attachment of item.attachments||[])params.append('Attachments',attachment);
+   const response=await fetch(item.sendUrl,{method:'POST',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','Accept':'text/html'},body:params.toString(),cache:'no-store'});
+   if(!response.ok){const detail=(await response.text()).trim();throw new Error(`Manager returned HTTP ${response.status}${detail?': '+detail.slice(0,500):''}`)}
+   item.status='sent';item.error='';sent++;
+  }catch(e){item.status='failed';item.error=String(e?.message||e);failed++}
+  renderBulkList();
+ }
+ bulkBusy=false;updateBulkButton();updateBulkSendButton();
+ $('bulkSummary').textContent=`Batch complete: ${sent} sent successfully; ${failed} failed.`;
+ $('bulkProgress').textContent='Sent emails are recorded in Manager’s email history. Failed messages are marked below; review before attempting any manual retry to avoid duplicates.';
+ notice(`Bulk reminder batch complete: ${sent} sent, ${failed} failed. Check the review list for details.` ,failed?'error':'ok');
+}
+
+$('bulkSend').addEventListener('click',prepareBulkBatch);
+$('closeBulk').addEventListener('click',hideBulkModal);$('cancelBulk').addEventListener('click',hideBulkModal);
+$('bulkModal').addEventListener('click',e=>{if(e.target===$('bulkModal'))hideBulkModal()});
+$('sendBulk').addEventListener('click',sendBulkBatch);
+$('reload').addEventListener('click',()=>refresh(true));$('saveSettings').addEventListener('click',()=>refresh(true));$('search').addEventListener('input',render);$('filter').addEventListener('change',render);$('sort').addEventListener('change',render);$('selectAll').addEventListener('change',()=>{const a=visible();if($('selectAll').checked)a.forEach(i=>selected.add(i._key));else a.forEach(i=>selected.delete(i._key));render()});$('openSelected').addEventListener('click',()=>{const keys=[...selected];if(!keys.length){notice('Select one or more invoices first.','info');return}const i=allInvoices.find(x=>x._key===keys[0]);if(keys.length>1)notice(`Opening the first of ${keys.length} selected invoices. Browsers may block multiple tabs; use each row’s Prepare reminder button for the others.`,'info');if(i)openInvoice(i._key)});$('prev').addEventListener('click',()=>{});$('next').addEventListener('click',()=>{});
+loadSettings();
+})();
+</script></body></html>
